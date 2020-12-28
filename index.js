@@ -23,22 +23,60 @@ const start = () => {
                 "Add Department",
                 "Add Role",
                 "Add Employee",
-                "Update Employee Role"]
+                "Update Employee Role",
+                "EXIT"]
         })
         .then(function (answer) {
             // Execute correct function based on user's answer
-            if (answer.chooseAction === "View All Departments") {
-                viewDepartments();
-            }
-            else if (answer.chooseAction === "View All Roles") {
-                viewRoles();
-            }
-            else if (answer.chooseAction === "View All Employees") {
-                viewEmployees();
-            } else {
-                connection.end();
+            switch (answer.chooseAction) {
+                case "View All Departments":
+                    viewDepartments();
+                    break;
+                case "View All Roles":
+                    viewRoles();
+                    break;
+                case "View All Employees":
+                    viewEmployees();
+                    break;
+                case "Add Department":
+                    addDepartment();
+                    break;
+                case "Add Role":
+                    addRole();
+                    break;
+                case "Add Employee":
+                    addEmployee();
+                    break;
+                case "Update Employee Role":
+                    updateEmpRole();
+                    break;
+                case "EXIT":
+                    connection.end();
+                    break;
             }
         });
+}
+
+// Query the database and return all departments for viewing
+const viewDepartments = () => {
+    connection.query('SELECT * FROM department;', (err, results) => {
+        if (err) throw err;
+        // Display results of query in a table format
+        console.table(results);
+        // Return user to initial questions for further actions
+        start();
+    })
+}
+
+// Query the database and return all roles for viewing
+const viewRoles = () => {
+    connection.query('SELECT * FROM role;', (err, results) => {
+        if (err) throw err;
+        // Display results of query in a table format
+        console.table(results);
+        // Return user to initial questions for further actions
+        start();
+    })
 }
 
 // Query the database and return all employees for viewing

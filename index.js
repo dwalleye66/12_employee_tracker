@@ -129,9 +129,9 @@ const addDepartment = () => {
         });
 };
 
-// Prompts user for name, salary, and department of new role to add; adds department to database
+// Prompts user for name, salary, and department of new role to add; adds role to database
 const addRole = () => {
-    connection.query("SELECT * FROM department", function (err, results) {
+    connection.query("SELECT * FROM department", (err, results) => {
         if (err) throw err;
         inquirer
             .prompt([
@@ -157,11 +157,11 @@ const addRole = () => {
                     type: "list",
                     message: "Which department does this role belong to?",
                     choices: () => {
-                        let choiceArray = [];
+                        let departmentArray = [];
                         for (var i = 0; i < results.length; i++) {
-                            choiceArray.push(results[i].name);
+                            departmentArray.push(results[i].name);
                         }
-                        return choiceArray;
+                        return departmentArray;
                     }
                 }
             ])
@@ -192,47 +192,140 @@ const addRole = () => {
     });
 };
 
+// Prompts user for first_name, last_name, department, role, and manager of new employee to add; adds employee to database
+const addEmployee = () => {
+    connection.query("SELECT * FROM role", (err, roleData) => {
+        connection.query("SELECT * FROM employee", (err, employeeData) => {
+            if (err) throw err;
+            inquirer
+                .prompt([
+                    {
+                        name: "firstName",
+                        type: "input",
+                        message: "What is the first name of the employee you'd like to add?"
+                    },
+                    {
+                        name: "lastName",
+                        type: "input",
+                        message: "What is the last name of the employee you'd like to add?"
+                    },
+                    {
+                        name: "role",
+                        type: "list",
+                        message: "What is the employee's role?",
+                        choices: () => {
+                            let roleArray = [];
+                            for (var i = 0; i < roleData.length; i++) {
+                                roleArray.push(roleData[i].title);
+                            }
+                            return roleArray;
+                        }
+                    },
+                    {
+                        name: "manager",
+                        type: "list",
+                        message: "Who is the employee's manager?",
+                        choices: () => {
+                            let managerArray = ["None"];
+                            for (var i = 0; i < employeeData.length; i++) {
+                                managerArray.push(employeeData[i].first_name + " " + employeeData[i].last_name);
+                            }
+                            return managerArray;
+                        }
+                    }
+                ])
+                .then((answer) => {
+                    // Find ID of Chosen Role
+                    let chosenRoleID;
 
-// Query the database and return all employees for viewing
-// const addEmployee = () => {
-//     inquirer.prompt(
-//         {
-//             name: "firstName",
-//             type: "input",
-//             message: "What is the employee's first name?"
-//         }
-//     );
+                    for (var i = 0; i < roleData.length; i++) {
+                        if (roleData[i].title === answer.role) {
+                            chosenRoleID = roleData[i].id;
+                        }
+                    }
 
-//     const { lastName } = await inquirer.prompt(
-//         {
-//             name: "lastName",
-//             type: "input",
-//             message: "What is the employee's last name?"
-//         }
-//     );
+                    // Find ID of Chosen Manager
+                    let chosenManagerID;
 
-//     await connection.query(
-//         `SELECT 
-//           employee.first_name
-//         , employee.last_name
-//         , role.title
-//         FROM employee 
-//         LEFT JOIN role ON employee.role_id = role.id 
-//         WHERE role.title = "Manager";`,
-//         (err, results) => {
-//             if (err) throw err;
-//             // Display results of query in a table format
-//             console.table(results)
-//         });
+                    for (var i = 0; i < employeeData.length; i++) {
+                        if (employeeData[i].first_name + " " + employeeData[i].last_name === answer.manager) {
+                            chosenManagerID = employeeData[i].id;
+                        }
+                    }
 
-//     await inquirer.prompt(
-//         {
-//             name: "manager",
-//             type: "list",
-//             message: "What is the employee's last name?"
-//         }
-//     );
+                    connection.query(
+                        "INSERT INTO employee SET ?",
+                        {
+                            first_name: answer.firstName,
+                            last_name: answer.lastName,
+                            role_id: chosenRoleID,
+                            manager_id: chosenManagerID
+                        },
+                        (err) => {
+                            if (err) throw err;
+                            console.log("The employee was added successfully!");
+                            // Return user to initial questions for further actions
+                            start();
+                        }
+                    );
+                });
+        });
+    })
+};
 
+// Prompts user for first_name, last_name, department, role, and manager of new employee to add; adds employee to database
+const updateEmpRole = () => {
+    connection.query("SELECT * FROM employee", (err, employees) => {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    name: "employee",
+                    type: "list",
+                    message: "Which employee would you like to update?",
+                    choices: () => {
+                        let employeeArray = [];
+                        for (var i = 0; i < employees.length; i++) {
+                            employeeArray.push(employee[i].first_name + " " + employees[i].last_name);
+                        }
+                        return employeeArray;
+                    }
+                }
+            ])
+            .then((answer) => {
+                // Find ID of Chosen Role
+                let chosenRoleID;
 
-//     console.log('firstName, lastName :>> ', firstName, lastName);
-// }
+                for (var i = 0; i < roleData.length; i++) {
+                    if (roleData[i].title === answer.role) {
+                        chosenRoleID = roleData[i].id;
+                    }
+                }
+
+                // Find ID of Chosen Manager
+                let chosenManagerID;
+
+                for (var i = 0; i < employeeData.length; i++) {
+                    if (employeeData[i].first_name + " " + employeeData[i].last_name === answer.manager) {
+                        chosenManagerID = employeeData[i].id;
+                    }
+                }
+
+                connection.query(
+                    "INSERT INTO employee SET ?",
+                    {
+                        first_name: answer.firstName,
+                        last_name: answer.lastName,
+                        role_id: chosenRoleID,
+                        manager_id: chosenManagerID
+                    },
+                    (err) => {
+                        if (err) throw err;
+                        console.log("The employee was added successfully!");
+                        // Return user to initial questions for further actions
+                        start();
+                    }
+                );
+            });
+    });
+};

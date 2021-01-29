@@ -273,59 +273,75 @@ const addEmployee = () => {
     })
 };
 
-// Prompts user for first_name, last_name, department, role, and manager of new employee to add; adds employee to database
+// Prompts user to choose employee they want to update and their new role; updates employee's role in database
 const updateEmpRole = () => {
-    connection.query("SELECT * FROM employee", (err, employees) => {
-        if (err) throw err;
-        inquirer
-            .prompt([
-                {
-                    name: "employee",
-                    type: "list",
-                    message: "Which employee would you like to update?",
-                    choices: () => {
-                        let employeeArray = [];
-                        for (var i = 0; i < employees.length; i++) {
-                            employeeArray.push(employee[i].first_name + " " + employees[i].last_name);
-                        }
-                        return employeeArray;
-                    }
-                }
-            ])
-            .then((answer) => {
-                // Find ID of Chosen Role
-                let chosenRoleID;
-
-                for (var i = 0; i < roleData.length; i++) {
-                    if (roleData[i].title === answer.role) {
-                        chosenRoleID = roleData[i].id;
-                    }
-                }
-
-                // Find ID of Chosen Manager
-                let chosenManagerID;
-
-                for (var i = 0; i < employeeData.length; i++) {
-                    if (employeeData[i].first_name + " " + employeeData[i].last_name === answer.manager) {
-                        chosenManagerID = employeeData[i].id;
-                    }
-                }
-
-                connection.query(
-                    "INSERT INTO employee SET ?",
+    connection.query("SELECT * FROM role", (err, roles) => {
+        connection.query("SELECT * FROM employee", (err, employees) => {
+            if (err) throw err;
+            inquirer
+                .prompt([
                     {
-                        first_name: answer.firstName,
-                        last_name: answer.lastName,
-                        role_id: chosenRoleID,
-                        manager_id: chosenManagerID
+                        name: "employee",
+                        type: "list",
+                        message: "Which employee would you like to update?",
+                        choices: () => {
+                            let employeeArray = [];
+                            for (var i = 0; i < employees.length; i++) {
+                                employeeArray.push(employees[i].first_name + " " + employees[i].last_name);
+                            }
+                            return employeeArray;
+                        }
                     },
-                    (err) => {
-                        if (err) throw err;
-                        console.log("The employee was added successfully!");
-                        // Return user to initial questions for further actions
-                        start();
+                    {
+                        name: "newRole",
+                        type: "list",
+                        message: "What is the employee's new role?",
+                        choices: () => {
+                            let newRoleArray = [];
+                            for (var i = 0; i < roles.length; i++) {
+                                newRoleArray.push(roles[i].title);
+                            }
+                            return newRoleArray;
+                        }
                     }
-                );
-            });
+                ])
+                .then((answer) => {
+                    // Find ID of Chosen Employee
+                    let chosenEmployeeID;
+
+                    for (var i = 0; i < employees.length; i++) {
+                        if (employees[i].first_name + " " + employees[i].last_name === answer.employee) {
+                            chosenEmployeeID = employees[i].id;
+                        }
+                    }
+
+                    // Find ID of Chosen New Role
+                    let chosenNewRoleID;
+
+                    for (var i = 0; i < roles.length; i++) {
+                        if (roles[i].title === answer.newRole) {
+                            chosenNewRoleID = roles[i].id;
+                        }
+                    }
+
+                    connection.query(
+                        "UPDATE employee SET ? WHERE ?",
+                        [
+                            {
+                                role_id: chosenNewRoleID
+                            },
+                            {
+                                id: chosenEmployeeID
+                            }
+                        ],
+                        (err) => {
+                            if (err) throw err;
+                            console.log("The employee's role was updated successfully!");
+                            // Return user to initial questions for further actions
+                            start();
+                        }
+                    );
+                });
+        });
     });
 };

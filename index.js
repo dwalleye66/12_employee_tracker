@@ -156,30 +156,19 @@ const addRole = () => {
                     name: "department",
                     type: "list",
                     message: "Which department does this role belong to?",
-                    choices: () => {
-                        let departmentArray = [];
-                        for (var i = 0; i < results.length; i++) {
-                            departmentArray.push(results[i].name);
-                        }
-                        return departmentArray;
-                    }
+                    choices: results.map(({ name }) => name)
                 }
             ])
             .then((answer) => {
-                let chosenDepartmentID;
 
-                for (var i = 0; i < results.length; i++) {
-                    if (results[i].name === answer.department) {
-                        chosenDepartmentID = results[i].id;
-                    }
-                }
+                const { id } = results.find(({ name }) => name === answer.department);
 
                 connection.query(
                     "INSERT INTO role SET ?",
                     {
                         title: answer.roleName,
                         salary: answer.salary,
-                        department_id: chosenDepartmentID
+                        department_id: id
                     },
                     (err) => {
                         if (err) throw err;
@@ -215,7 +204,7 @@ const addEmployee = () => {
                         message: "What is the employee's role?",
                         choices: () => {
                             let roleArray = [];
-                            for (var i = 0; i < roleData.length; i++) {
+                            for (let i = 0; i < roleData.length; i++) {
                                 roleArray.push(roleData[i].title);
                             }
                             return roleArray;
@@ -227,7 +216,7 @@ const addEmployee = () => {
                         message: "Who is the employee's manager?",
                         choices: () => {
                             let managerArray = ["None"];
-                            for (var i = 0; i < employeeData.length; i++) {
+                            for (let i = 0; i < employeeData.length; i++) {
                                 managerArray.push(employeeData[i].first_name + " " + employeeData[i].last_name);
                             }
                             return managerArray;
@@ -238,7 +227,7 @@ const addEmployee = () => {
                     // Find ID of Chosen Role
                     let chosenRoleID;
 
-                    for (var i = 0; i < roleData.length; i++) {
+                    for (let i = 0; i < roleData.length; i++) {
                         if (roleData[i].title === answer.role) {
                             chosenRoleID = roleData[i].id;
                         }
@@ -247,7 +236,7 @@ const addEmployee = () => {
                     // Find ID of Chosen Manager
                     let chosenManagerID;
 
-                    for (var i = 0; i < employeeData.length; i++) {
+                    for (let i = 0; i < employeeData.length; i++) {
                         if (employeeData[i].first_name + " " + employeeData[i].last_name === answer.manager) {
                             chosenManagerID = employeeData[i].id;
                         }
@@ -286,7 +275,7 @@ const updateEmpRole = () => {
                         message: "Which employee would you like to update?",
                         choices: () => {
                             let employeeArray = [];
-                            for (var i = 0; i < employees.length; i++) {
+                            for (let i = 0; i < employees.length; i++) {
                                 employeeArray.push(employees[i].first_name + " " + employees[i].last_name);
                             }
                             return employeeArray;
@@ -298,7 +287,7 @@ const updateEmpRole = () => {
                         message: "What is the employee's new role?",
                         choices: () => {
                             let newRoleArray = [];
-                            for (var i = 0; i < roles.length; i++) {
+                            for (let i = 0; i < roles.length; i++) {
                                 newRoleArray.push(roles[i].title);
                             }
                             return newRoleArray;
@@ -309,7 +298,7 @@ const updateEmpRole = () => {
                     // Find ID of Chosen Employee
                     let chosenEmployeeID;
 
-                    for (var i = 0; i < employees.length; i++) {
+                    for (let i = 0; i < employees.length; i++) {
                         if (employees[i].first_name + " " + employees[i].last_name === answer.employee) {
                             chosenEmployeeID = employees[i].id;
                         }
@@ -318,7 +307,7 @@ const updateEmpRole = () => {
                     // Find ID of Chosen New Role
                     let chosenNewRoleID;
 
-                    for (var i = 0; i < roles.length; i++) {
+                    for (let i = 0; i < roles.length; i++) {
                         if (roles[i].title === answer.newRole) {
                             chosenNewRoleID = roles[i].id;
                         }

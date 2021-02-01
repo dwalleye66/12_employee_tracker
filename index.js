@@ -185,7 +185,15 @@ const addRole = () => {
 const addEmployee = () => {
     connection.query("SELECT * FROM role", (err, roleData) => {
         connection.query("SELECT * FROM employee", (err, employeeData) => {
+
             if (err) throw err;
+
+            const fullNames = employeeData.map(({ first_name, last_name }) => {
+                return first_name + " " + last_name
+            });
+
+            console.log('fullNames :>> ', fullNames);
+
             inquirer
                 .prompt([
                     {
@@ -202,53 +210,33 @@ const addEmployee = () => {
                         name: "role",
                         type: "list",
                         message: "What is the employee's role?",
-                        choices: () => {
-                            let roleArray = [];
-                            for (let i = 0; i < roleData.length; i++) {
-                                roleArray.push(roleData[i].title);
-                            }
-                            return roleArray;
-                        }
+                        choices: roleData.map(({ title }) => title)
                     },
                     {
                         name: "manager",
                         type: "list",
                         message: "Who is the employee's manager?",
-                        choices: () => {
-                            let managerArray = ["None"];
-                            for (let i = 0; i < employeeData.length; i++) {
-                                managerArray.push(employeeData[i].first_name + " " + employeeData[i].last_name);
-                            }
-                            return managerArray;
-                        }
+                        choices: fullNames
                     }
                 ])
                 .then((answer) => {
                     // Find ID of Chosen Role
-                    let chosenRoleID;
+                    var { id } = roleData.find(({ title }) => title === answer.role);
 
-                    for (let i = 0; i < roleData.length; i++) {
-                        if (roleData[i].title === answer.role) {
-                            chosenRoleID = roleData[i].id;
-                        }
-                    }
+                    const roleID = id;
 
                     // Find ID of Chosen Manager
-                    let chosenManagerID;
+                    var { id } = employeeData.find(({ first_name, last_name }) => first_name + " " + last_name === answer.manager);
 
-                    for (let i = 0; i < employeeData.length; i++) {
-                        if (employeeData[i].first_name + " " + employeeData[i].last_name === answer.manager) {
-                            chosenManagerID = employeeData[i].id;
-                        }
-                    }
+                    const managerID = id;
 
                     connection.query(
                         "INSERT INTO employee SET ?",
                         {
                             first_name: answer.firstName,
                             last_name: answer.lastName,
-                            role_id: chosenRoleID,
-                            manager_id: chosenManagerID
+                            role_id: roleID,
+                            manager_id: managerID
                         },
                         (err) => {
                             if (err) throw err;

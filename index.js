@@ -255,60 +255,45 @@ const updateEmpRole = () => {
     connection.query("SELECT * FROM role", (err, roles) => {
         connection.query("SELECT * FROM employee", (err, employees) => {
             if (err) throw err;
+
+            const fullNames = employees.map(({ first_name, last_name }) => {
+                return first_name + " " + last_name
+            });
+
             inquirer
                 .prompt([
                     {
                         name: "employee",
                         type: "list",
                         message: "Which employee would you like to update?",
-                        choices: () => {
-                            let employeeArray = [];
-                            for (let i = 0; i < employees.length; i++) {
-                                employeeArray.push(employees[i].first_name + " " + employees[i].last_name);
-                            }
-                            return employeeArray;
-                        }
+                        choices: fullNames
                     },
                     {
                         name: "newRole",
                         type: "list",
                         message: "What is the employee's new role?",
-                        choices: () => {
-                            let newRoleArray = [];
-                            for (let i = 0; i < roles.length; i++) {
-                                newRoleArray.push(roles[i].title);
-                            }
-                            return newRoleArray;
-                        }
+                        choices: roles.map(({ title }) => title)
                     }
                 ])
                 .then((answer) => {
                     // Find ID of Chosen Employee
-                    let chosenEmployeeID;
+                    var { id } = employees.find(({ first_name, last_name }) => first_name + " " + last_name === answer.employee);
 
-                    for (let i = 0; i < employees.length; i++) {
-                        if (employees[i].first_name + " " + employees[i].last_name === answer.employee) {
-                            chosenEmployeeID = employees[i].id;
-                        }
-                    }
+                    const employeeID = id;
 
                     // Find ID of Chosen New Role
-                    let chosenNewRoleID;
+                    var { id } = roles.find(({ title }) => title === answer.newRole);
 
-                    for (let i = 0; i < roles.length; i++) {
-                        if (roles[i].title === answer.newRole) {
-                            chosenNewRoleID = roles[i].id;
-                        }
-                    }
+                    const roleID = id;
 
                     connection.query(
                         "UPDATE employee SET ? WHERE ?",
                         [
                             {
-                                role_id: chosenNewRoleID
+                                role_id: roleID
                             },
                             {
-                                id: chosenEmployeeID
+                                id: employeeID
                             }
                         ],
                         (err) => {

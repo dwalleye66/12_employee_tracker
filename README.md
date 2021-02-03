@@ -50,11 +50,11 @@ Follow the prompts in the CLI to perform the following commands:
 
 To watch a video demonstrating the full functionality of this application, click on the following link:
 
-[Employee Tracker Demo Video](https://drive.google.com/file/d/197W6_kaPPxFe_pOWg9K3FGI8j35as9J-/view?usp=sharing)
+[Employee Tracker Demo Video](https://drive.google.com/file/d/1WorWwq6d9ReHIWvH6aaJ3ctdKxV7ChGw/view?usp=sharing)
 
 The following GIF is an abbreviated version of the demo video above:
 
-![Employee Tracker Demo GIF](./assets/videos/README_generator_demo.gif)
+![Employee Tracker Demo GIF](./assets/videos/employee_tracker_demo.gif)
 
 -----
 

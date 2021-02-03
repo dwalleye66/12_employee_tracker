@@ -192,8 +192,6 @@ const addEmployee = () => {
                 return first_name + " " + last_name
             });
 
-            console.log('fullNames :>> ', fullNames);
-
             inquirer
                 .prompt([
                     {
